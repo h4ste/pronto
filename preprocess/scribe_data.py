@@ -14,7 +14,7 @@ except ImportError:
     print('Package \'tqdm\' not installed. Falling back to simple progress display.')
     from mock_tqdm import trange, tqdm
 
-from modeling import CANTRIPModel
+from modeling import PRONTOModel
 
 # Symbol used to denote unknown or out-of-vocabulary words
 _UNK = 'UNK'
@@ -748,11 +748,11 @@ class ChronologyBatch(object):
                                self.snapshots,
                                self.snapshot_sizes)
 
-    def feed(self, model: CANTRIPModel, training=False):
-        """Feed this chronology batch to a CANTRIPModel object
+    def feed(self, model: PRONTOModel, training=False):
+        """Feed this chronology batch to a PRONTOModel object
 
-        :param model: CANTRIP model which will be fed the data in this batch
-        :param training: whether CANTRIP is in training or inference mode (i.e., whether to use dropout)
+        :param model: PRONTOModel model which will be fed the data in this batch
+        :param training: whether PRONTO is in training or inference mode (i.e., whether to use dropout)
         :return: a feed dict for use with TensorFlow session.run()
         """
         return {model.observations: self.snapshots,

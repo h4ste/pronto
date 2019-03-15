@@ -8,10 +8,10 @@ import layers
 CELL_TYPES = ['LRAN', 'RAN', 'LSTM', 'GRU']
 
 
-class CANTRIPModel(object):
-    """reCurrent Additive Network for Temporal RIsk Predicition (CANTRIP) model
+class PRONTOModel(object):
+    """reCurrent Additive Network for Temporal RIsk Predicition (PRONTO) model
 
-    This class contains a TensorFlow implementation of CANTRIP as described in the AMIA paper
+    This class contains a TensorFlow implementation of PRONTO as described in the AMIA paper
 
     Attributes:
         max_seq_len (int): the maximum number of clinical snapshots used in any mini-batch
@@ -59,11 +59,11 @@ class CANTRIPModel(object):
                  num_hidden: Union[int, List[int]],
                  cell_type: str,
                  batch_size: int,
-                 snapshot_encoder: Callable[['CANTRIPModel'], tf.Tensor],
+                 snapshot_encoder: Callable[['PRONTOModel'], tf.Tensor],
                  dropout: float = 0.,
                  vocab_dropout: float = None,
                  num_classes: int = 2):
-        """Initializes a new CANTRIP model with the given model parameters
+        """Initializes a new PRONTO model with the given model parameters
         :param max_seq_len: the maximum number of clinical snapshots used in any mini-batch
         :param max_snapshot_size: the maximum number of observations documented in any clinical snapshot
         :param vocabulary_size:  the number of unique observations

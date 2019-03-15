@@ -32,7 +32,7 @@ flags = tf.flags
 FLAGS = flags.FLAGS
 
 # Data parameters
-flags.DEFINE_string('data_dir', None,
+flags.DEFINE_string('chrono_file', None,
                     help='The input data directory. Should contain the chronology files (or other data files).')
 
 flags.DEFINE_string('vocab_file', None, help='The vocabulary file that chronologies were created with.')
@@ -50,13 +50,13 @@ flags.DEFINE_boolean('use_discrete_deltas', default=False,
                      help='Rather than encoding deltas as tanh(log(delta)), they will be discretized into buckets: > '
                           '1 day, > 2 days, > 1 week, etc.')
 
-# CANTRIP: General parameters
+# PRONTO: General parameters
 flags.DEFINE_float('dropout', default=0.7, lower_bound=0.,
                    help='Dropout used for all dropout layers (except vocabulary)')
 flags.DEFINE_float('vocab_dropout', default=0.7, lower_bound=0.,
                    help='Dropout used for vocabulary-level dropout (supersedes --dropout)')
 
-# CANTRIP: Clinical Snapshot Encoder parameters
+# PRONTO: Clinical Snapshot Encoder parameters
 flags.DEFINE_integer('observation_embedding_size', default=200, lower_bound=1,
                      help='The dimensions of observation embedding vectors.')
 flags.DEFINE_integer('snapshot_embedding_size', default=200, lower_bound=1,
@@ -88,7 +88,7 @@ flags.DEFINE_multi_integer('snapshot_dan_num_hidden_obs', default=[200, 200], lo
                            help='The number of hidden units to use when refining clinical observation embeddings; '
                                 'multiple arguments results in multiple dense layers.')
 
-# CANTRIP: Clinical Picture Inference parameters
+# PRONTO: Clinical Picture Inference parameters
 flags.DEFINE_multi_integer('rnn_num_hidden', default=[100], lower_bound=1,
                            help='The size of hidden layer(s) used for inferring the clinical picture; '
                                 'multiple arguments result in multiple hidden layers.')
@@ -119,17 +119,11 @@ flags.DEFINE_boolean('save_latex_results', default=False,
 flags.DEFINE_boolean('save_tabbed_results', default=False,
                      help='Whether to save performance in a tab-separated table.')
 
-flags.DEFINE_enum('optimizer', enum_values=['CANTRIP', 'BERT'], default='CANTRIP',
-                  help='The type of optimizer to use when training CANTRIP.')
+flags.DEFINE_enum('optimizer', enum_values=['PRONTO', 'BERT'], default='PRONTO',
+                  help='The type of optimizer to use when training PRONTO.')
 
 flags.DEFINE_float('learning_rate', default=1e-4, lower_bound=np.nextafter(np.float32(0), np.float32(1)),
                    help='The initial learning rate.')
-
-flags.DEFINE_boolean('do_train', default=False, help='Whether to train on training data.')
-flags.DEFINE_boolean('do_train_eval', default=False,
-                     help='Whether to train on training data while repeatedly evaluating on development data.')
-flags.DEFINE_boolean('do_eval', default=False, help='Whether to evaluate on development data.')
-flags.DEFINE_boolean('do_predict', default=False, help='Whether to run predictions on test data.')
 
 
 def make_train_devel_test_split(data: Iterable, ratio: str) -> (Iterable, Iterable, Iterable):
@@ -158,10 +152,10 @@ def run_model(model, raw_cohort, delta_encoder):
     This function:
     (1) balanced the dataset
     (2) splits the cohort intro training:development:testing sets at the patient-level
-    (3) trains CANTRIP and saves checkpoint/summaries for TensorBoard
-    (4) evaluates CANTRIP on the development and testing set
-    :param model: an instantiated CANTRIP model
-    :type model: modeling.CANTRIPModel
+    (3) trains PRONTO and saves checkpoint/summaries for TensorBoard
+    (4) evaluates PRONTO on the development and testing set
+    :param model: an instantiated PRONTO model
+    :type model: modeling.PRONTOModel
     :param raw_cohort: the cohort to use for this experimental run
     :type raw_cohort: preprocess.Cohort
     :param delta_encoder: encoder used to represented elapsed time deltas
@@ -214,7 +208,7 @@ def run_model(model, raw_cohort, delta_encoder):
     model_summaries_dir = os.path.join(FLAGS.output_dir, FLAGS.optimizer, FLAGS.rnn_cell_type,
                                        FLAGS.snapshot_encoder, model_file)
     model_checkpoint_dir = os.path.join(FLAGS.output_dir, FLAGS.optimizer, FLAGS.rnn_cell_type,
-                                        FLAGS.snapshot_encoder, model_file, 'cantrip_model')
+                                        FLAGS.snapshot_encoder, model_file, 'pronto_model')
 
     # Clear any previous summaries/checkpoints if asked
     if FLAGS.clear_prev:
@@ -225,9 +219,9 @@ def run_model(model, raw_cohort, delta_encoder):
     # Make output directories so we don't blow up when saving
     nio.make_dirs_quiet(model_checkpoint_dir)
 
-    # Instantiate CANTRIP optimizer and summarizer classes
-    if FLAGS.optimizer == 'CANTRIP':
-        optimizer = optimization.CANTRIPOptimizer(model, learning_rate=FLAGS.learning_rate, sparse=True)
+    # Instantiate PRONTO optimizer and summarizer classes
+    if FLAGS.optimizer == 'PRONTO':
+        optimizer = optimization.PRONTOOptimizer(model, learning_rate=FLAGS.learning_rate, sparse=True)
     elif FLAGS.optimizer == 'BERT':
         epoch_steps = len(cohort[train].make_epoch_batches(batch_size=FLAGS.batch_size,
                                                            max_snapshot_size=FLAGS.max_snapshot_size,
@@ -242,7 +236,7 @@ def run_model(model, raw_cohort, delta_encoder):
         raise NotImplementedError('No optimizer available for %s' % FLAGS.optimizer)
 
     # noinspection PyUnboundLocalVariable
-    summarizer = summarization.CANTRIPSummarizer(model, optimizer)
+    summarizer = summarization.PRONTOSummarizer(model, optimizer)
 
     # Now that everything has been defined in TensorFlow's computation graph, initialize our model saver
     saver = tf.train.Saver(tf.global_variables())
@@ -432,7 +426,7 @@ def main(argv):
     del argv
 
     # Load cohort
-    cohort = preprocess.Cohort.from_disk(FLAGS.data_dir, FLAGS.vocab_file, FLAGS.max_vocab_size)
+    cohort = preprocess.Cohort.from_disk(FLAGS.chrono_file, FLAGS.vocab_file, FLAGS.max_vocab_size)
 
     # Compute vocabulary size (it may be smaller than args.vocabulary_size)
     vocabulary_size = len(cohort.vocabulary)
@@ -462,24 +456,23 @@ def main(argv):
 
     delta_encoder = preprocess.TanhLogDeltaEncoder() if FLAGS.use_discrete_deltas else preprocess.DiscreteDeltaEncoder()
 
-    model = modeling.CANTRIPModel(max_seq_len=FLAGS.max_chrono_length,
-                                  max_snapshot_size=FLAGS.max_snapshot_size,
-                                  vocabulary_size=vocabulary_size,
-                                  observation_embedding_size=observation_embedding_size,
-                                  num_hidden=FLAGS.rnn_num_hidden,
-                                  cell_type=cell_type,
-                                  batch_size=FLAGS.batch_size,
-                                  snapshot_encoder=snapshot_encoder,
-                                  dropout=FLAGS.dropout,
-                                  num_classes=2,
-                                  delta_encoding_size=delta_encoder.size)
+    model = modeling.PRONTOModel(max_seq_len=FLAGS.max_chrono_length,
+                                 max_snapshot_size=FLAGS.max_snapshot_size,
+                                 vocabulary_size=vocabulary_size,
+                                 observation_embedding_size=observation_embedding_size,
+                                 num_hidden=FLAGS.rnn_num_hidden,
+                                 cell_type=cell_type,
+                                 batch_size=FLAGS.batch_size,
+                                 snapshot_encoder=snapshot_encoder,
+                                 dropout=FLAGS.dropout,
+                                 num_classes=2,
+                                 delta_encoding_size=delta_encoder.size)
 
-    if FLAGS.do_train:
-        run_model(model, cohort, delta_encoder)
+    run_model(model, cohort, delta_encoder)
 
 
 if __name__ == '__main__':
-    flags.mark_flag_as_required('data_dir')
+    flags.mark_flag_as_required('chrono_file')
     flags.mark_flag_as_required('vocab_file')
     flags.mark_flag_as_required('output_dir')
     tf.logging.set_verbosity(tf.logging.DEBUG)

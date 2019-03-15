@@ -6,7 +6,7 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_sc
     average_precision_score
 
 import preprocess
-import run_cantrip
+import run_pronto
 
 np.random.seed(1337)
 
@@ -60,7 +60,7 @@ def run_model(model, args):
     # Balance training data
     cohort = cohort.balance_chronologies()
     # Create training:development:testing split
-    train, devel, test = run_cantrip.make_train_devel_test_split(cohort.patients(), args.tdt_ratio)
+    train, devel, test = run_pronto.make_train_devel_test_split(cohort.patients(), args.tdt_ratio)
 
     # Convert chronologies into single-step binary classification examples given
     # O_i and delta_(i+1) predict pneumonia in O_(i+1)
@@ -74,8 +74,8 @@ def run_model(model, args):
     devel_eval = evaluate_classifier(devel[0], devel[1], model)
     test_eval = evaluate_classifier(test[0], test[1], model)
 
-    # run_cantrip.print_table_results(train_eval, devel_eval, test_eval, tablefmt='simple')
-    run_cantrip.print_table_results(train_eval, devel_eval, test_eval, tablefmt='latex_booktabs')
+    # run_pronto.print_table_results(train_eval, devel_eval, test_eval, tablefmt='simple')
+    run_pronto.print_table_results(train_eval, devel_eval, test_eval, tablefmt='latex_booktabs')
 
 
 def main():

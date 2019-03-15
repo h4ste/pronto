@@ -1,6 +1,6 @@
-""" Clinical snapshot encoders for use with CANTRIP Model.
+""" Clinical snapshot encoders for use with PRONTO Model.
 
-CANTRIPModel expects a clinical snapshot encoder function which takes as input the CANTRIPModel and adds
+PRONTOModel expects a clinical snapshot encoder function which takes as input the PRONTOModel and adds
 clinical snapshot encoding ops to the graph returning the final clinical snapshot encoding as
 [batch x max_seq_len x embedding_size]
 
@@ -116,8 +116,8 @@ def get_bag_vectors(model):
     """
     Represents snapshots as a bag of clinical observations. Specifically, returns a V-length
     binary vector such that the v-th index is 1 iff the v-th observation occurs in the given snapshot
-    :param model: CANTRIP model
-    :type model: modeling.CANTRIPModel
+    :param model: PRONTO model
+    :type model: modeling.PRONTOModel
     :return: clinical snapshot encoding
     """
     # 1. Evaluate which entries in model.observations are non-zero
@@ -151,8 +151,8 @@ def dense_encoder(model):
     """
     Represents documents as an embedded bag of clinical observations. Specifically, returns an embedded of the V-length
     binary vector encoding all clinical observations included in a snapshot
-    :param model: CANTRIP model
-    :type model: modeling.CANTRIPModel
+    :param model: PRONTO model
+    :type model: modeling.PRONTOModel
     :return: clinical snapshot encoding
     """
     with tf.variable_scope('dense_encoder'):
@@ -191,8 +191,8 @@ def bag_encoder(model):
     """
     Represents snapshots as a bag of clinical observations. Specifically, returns a V-length
     binary vector such that the v-th index is 1 iff the v-th observation occurs in the given snapshot
-    :param model: CANTRIP model
-    :type model: modeling.CANTRIPModel
+    :param model: PRONTO model
+    :type model: modeling.PRONTOModel
     :return: clinical snapshot encoding
     """
     with tf.variable_scope('bow_encoder'):
@@ -215,7 +215,7 @@ def dan_encoder(obs_hidden_units, avg_hidden_units):
         """
 
         :param model:
-        :type model: modeling.CANTRIPModel
+        :type model: modeling.PRONTOModel
         :return:
         """
         with tf.variable_scope('dan_encoder'):

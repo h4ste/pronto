@@ -1,11 +1,11 @@
 import tensorflow as tf
 
-from modeling import CANTRIPModel
+from modeling import PRONTOModel
 
 
-class CANTRIPSummarizer(object):
+class PRONTOSummarizer(object):
 
-    def __init__(self, model: CANTRIPModel, optimizer):
+    def __init__(self, model: PRONTOModel, optimizer):
         self.model = model
         self.optimizer = optimizer
 
@@ -51,14 +51,14 @@ class CANTRIPSummarizer(object):
             ])
 
         # Specific training/development/testing summarizers
-        self.train = _CANTRIPModeSummarizer('train', model)
-        self.devel = _CANTRIPModeSummarizer('devel', model)
-        self.test = _CANTRIPModeSummarizer('test', model)
+        self.train = _PRONTOModeSummarizer('train', model)
+        self.devel = _PRONTOModeSummarizer('devel', model)
+        self.test = _PRONTOModeSummarizer('test', model)
 
 
-class _CANTRIPModeSummarizer(object):
+class _PRONTOModeSummarizer(object):
 
-    def __init__(self, mode: str, model: CANTRIPModel):
+    def __init__(self, mode: str, model: PRONTOModel):
         self.mode = mode
         with tf.name_scope(mode) as scope:
             # Streaming, epoch-level metrics

@@ -8,14 +8,14 @@ from tensorflow.python.ops import math_ops, control_flow_ops
 import modeling
 
 
-class CANTRIPOptimizer(object):
+class PRONTOOptimizer(object):
 
     def __init__(self, model, sparse, learning_rate):
         """
-        Creates a new CANTRIPOptimizer responsible for optimizing CANTRIP. Allegedly, some day I will get around to
+        Creates a new PRONTOOptimizer responsible for optimizing PRONTO. Allegedly, some day I will get around to
         looking at other optimization strategies (e.g., sequence optimization).
-        :param model: a CANTRIPModel object
-        :type model:  modeling.CANTRIPModel
+        :param model: a PRONTOModel object
+        :type model:  modeling.PRONTOModel
         :param sparse: whether to use sparse softmax or not
         :type sparse: bool
         :param learning_rate: learning rate of the optimizer
@@ -44,10 +44,10 @@ class BERTOptimizer(object):
     def __init__(self, model, num_train_steps, num_warmup_steps=None, init_lr=1e-3,
                  lr_decay=True, clip_norm=1.0):
         """
-        Creates a new CANTRIPOptimizer responsible for optimizing CANTRIP. Allegedly, some day I will get around to
+        Creates a new PRONTOOptimizer responsible for optimizing PRONTO. Allegedly, some day I will get around to
         looking at other optimization strategies (e.g., sequence optimization).
-        :param model: a CANTRIPModel object
-        :type model: modeling.CANTRIPModel
+        :param model: a PRONTOModel object
+        :type model: modeling.PRONTOModel
         :param num_train_steps: number of training steps between decay steps
         :type num_train_steps: int
         :param num_warmup_steps: number of training steps before starting decay
