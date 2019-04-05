@@ -128,7 +128,7 @@ Additional command-line arguments:
 | --kernel | The type of kernel to evaluate | linear | linear, polynomial, rbf, sigmoid |
 | --[no]use_discrete_deltas | Rather than encoding deltas as tanh(log(delta)), they will be discretized into buckets: > 1 day, > 2 days, > 1 week, etc. | false | |
 
-### Training and Evaluating Support Vector Machines
+### Training and Evaluating Baselines
 Training and evaluating baselines can be accomplished by:
 ```bash
 $ python -m run_baselines.py [-h] \
@@ -161,7 +161,7 @@ The `pronto` script load chronology and vocabulary files. Chronology and vocabul
 ### Chronology format
 The format of this chronology file is assumed to be as follows:
 
-    [external_patient_id]\t[chronology]
+    [external_patient_id]:[external_visit_id]\t[chronology]
 
 where each ``[chronology]`` is encoded as as sequence of snapshots, separated by tabs:
 
@@ -177,9 +177,9 @@ vocabulary file.
 
 For example, the line:
 
-    11100004a   0 false 1104 1105 2300 25001    86400 false 1104 2300   172800 true 1104 2300 3500
+    11100004:1108a   0 false 1104 1105 2300 25001    86400 false 1104 2300   172800 true 1104 2300 3500
 
-would indicate that patient with external ID '11100004a' had a chronology including 3 snapshots
+would indicate that patient with external ID '11100004' and visit with external ID '1108a' had a chronology including 3 snapshots
 where:
 
 * the first snapshot was negative for pneumonia, had a delta of 0, and contained only three clinical
@@ -199,5 +199,6 @@ human-readable string describing the observation, and ``[frequency]`` is the fre
 the dataset (this value is only important if specifying a max_vocabulary_size as terms will be sorted in
 descending frequency before the cut-off is made)
 
-Note: as described in the AMIA paper , chronologies are truncated to terminate at the first positive label.
-Chronologies in which the first snapshot is positive or in which no snapshot is positive are discarded.
+Note: as described in the AMIA paper, chronologies are truncated to terminate at the first positive label.
+Chronologies in which the first snapshot is positive or in which no snapshot is positive are discarded. 
+The PRONTO scripts will automatically perform the truncation for you.
