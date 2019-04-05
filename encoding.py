@@ -24,7 +24,7 @@ def rnn_encoder(num_hidden, cell_fn=rnn_cell.RANCell):
     def _rnn_encoder(model):
         """
 
-        :type model: modeling.BERTModel
+        :type model: modeling.PRONTOModel
         """
         with tf.variable_scope('rnn_encoder'):
             # Embed clinical observations
@@ -71,7 +71,7 @@ def cnn_encoder(windows=None, kernels=1000, dropout=0.):
     def _cnn_encoder(model):
         """
 
-        :type model: BERTModel
+        :type model: PRONTOModel
         """
         with tf.variable_scope('cnn_encoder'):
             # Embed observations
