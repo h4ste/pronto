@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/175840952.svg)](https://zenodo.org/badge/latestdoi/175840952)
+
 # Pneumonia Risk predictiON neTwOrk (PRONTO)
 A TensorFlow model for predicting imminent pneumonia risk with a given time window based on retrospective analysis of longitudinal clinical notes.
 
