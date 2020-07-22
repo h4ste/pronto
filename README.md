@@ -2,6 +2,7 @@
 
 # Pneumonia Risk predictiON neTwOrk (PRONTO)
 A TensorFlow model for predicting imminent pneumonia risk with a given time window based on retrospective analysis of longitudinal clinical notes.
+Note: a more general, extended version of this project is available [here](https://github.com/h4ste/cantrip).
 
 # Dependencies
 - Python >= 3.6
